@@ -41,7 +41,7 @@ async function getOptions() {
       autoCaptureInterval: 5,
       exportSkcomm: true,
       exportSyncthing: false,
-      synthing_apiUrl: DEFAULT_SKCOMM_URL,
+      syncthing_apiUrl: DEFAULT_SKCOMM_URL,
       syncthing_folder: "consciousness-swipe",
       exportHttp: false,
       http_url: "",
@@ -280,7 +280,7 @@ async function handleCaptureSnapshot(payload) {
 
   // Target 2: Syncthing relay
   if (opts.exportSyncthing) {
-    const client = new SKCommClient(opts.synthing_apiUrl);
+    const client = new SKCommClient(opts.syncthing_apiUrl);
     try {
       await client.exportToSyncthing(snapshot, { folder: opts.syncthing_folder });
       exportResults.syncthing = new Date().toISOString();
@@ -365,7 +365,7 @@ async function handleExportSnapshot({ snapshot_id, targets = [], force = false }
         console.warn("[CS] Re-export to SKComm failed:", err.message);
       }
     } else if (target === "syncthing" && opts.exportSyncthing) {
-      const client = new SKCommClient(opts.synthing_apiUrl);
+      const client = new SKCommClient(opts.syncthing_apiUrl);
       try {
         await client.exportToSyncthing(snapshot, { folder: opts.syncthing_folder });
         exportResults.syncthing = new Date().toISOString();
@@ -706,6 +706,19 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     await runAutoCapture();
   }
 });
+
+// Migrate legacy key typo: synthing_apiUrl → syncthing_apiUrl (one-time on startup)
+(async () => {
+  try {
+    const { cs_options } = await chrome.storage.local.get("cs_options");
+    if (cs_options && "synthing_apiUrl" in cs_options && !("syncthing_apiUrl" in cs_options)) {
+      const migrated = { ...cs_options, syncthing_apiUrl: cs_options.synthing_apiUrl };
+      delete migrated.synthing_apiUrl;
+      await chrome.storage.local.set({ cs_options: migrated });
+      console.log("[CS] Migrated synthing_apiUrl → syncthing_apiUrl");
+    }
+  } catch { /* non-fatal */ }
+})();
 
 // Restore auto-capture alarm on service worker restart
 (async () => {

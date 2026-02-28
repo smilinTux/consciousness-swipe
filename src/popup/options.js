@@ -23,7 +23,7 @@ const DEFAULTS = {
   // Export targets
   exportSkcomm: true,
   exportSyncthing: false,
-  synthing_apiUrl: "http://localhost:9384",
+  syncthing_apiUrl: "http://localhost:9384",
   syncthing_folder: "consciousness-swipe",
   exportHttp: false,
   http_url: "",
@@ -58,7 +58,7 @@ async function load() {
   document.getElementById("export-skcomm").checked = opts.exportSkcomm;
 
   document.getElementById("export-syncthing").checked = opts.exportSyncthing;
-  document.getElementById("syncthing-api-url").value = opts.synthing_apiUrl;
+  document.getElementById("syncthing-api-url").value = opts.syncthing_apiUrl;
   document.getElementById("syncthing-folder").value = opts.syncthing_folder;
   toggleFields("syncthing-fields", opts.exportSyncthing);
 
@@ -88,8 +88,8 @@ async function save() {
     // Export targets
     exportSkcomm: document.getElementById("export-skcomm").checked,
     exportSyncthing: document.getElementById("export-syncthing").checked,
-    synthing_apiUrl:
-      document.getElementById("syncthing-api-url").value.trim() || DEFAULTS.synthing_apiUrl,
+    syncthing_apiUrl:
+      document.getElementById("syncthing-api-url").value.trim() || DEFAULTS.syncthing_apiUrl,
     syncthing_folder:
       document.getElementById("syncthing-folder").value.trim() || DEFAULTS.syncthing_folder,
     exportHttp: document.getElementById("export-http").checked,

@@ -6,15 +6,15 @@ Work through each section before submitting. Check off items as completed.
 
 ## A. Extension Package
 
-- [ ] `dist/` is fully built: `NODE_ENV=production node build.js`
-- [ ] `dist/manifest.json` has correct version: `0.2.0`
-- [ ] `dist/manifest.json` has correct `name`: `"Consciousness Swipe by smilinTux"`
-- [ ] No source maps in the ZIP (`.map` files excluded from dist)
-- [ ] No `node_modules/` in the ZIP
-- [ ] Icon files present: `icons/icon16.png`, `icons/icon48.png`, `icons/icon128.png`
-- [ ] ZIP created from the `dist/` directory contents (not the outer folder)
-- [ ] ZIP filename: `consciousness-swipe-0.2.0.zip`
-- [ ] ZIP is under 100MB (Chrome Web Store hard limit)
+- [x] `dist/` is fully built: `NODE_ENV=production node build.js`
+- [x] `dist/manifest.json` has correct version: `0.2.0`
+- [x] `dist/manifest.json` has correct `name`: `"Consciousness Swipe by smilinTux"`
+- [x] No source maps in the ZIP (`.map` files excluded from dist)
+- [x] No `node_modules/` in the ZIP
+- [x] Icon files present: `icons/icon16.png`, `icons/icon48.png`, `icons/icon128.png`
+- [x] ZIP created from the `dist/` directory contents (not the outer folder)
+- [x] ZIP filename: `consciousness-swipe-0.2.0.zip`
+- [x] ZIP is under 100MB (Chrome Web Store hard limit) — 37KB compressed
 
 **Verify ZIP:**
 ```bash
@@ -25,17 +25,17 @@ unzip -l consciousness-swipe-0.2.0.zip | head -30
 
 ## B. Manifest Checks
 
-- [ ] `manifest_version`: 3
-- [ ] `version`: matches `package.json` version
-- [ ] `description` is present and under 132 characters
-- [ ] `homepage_url` set to `https://smilintux.org`
-- [ ] All `host_permissions` are minimal and justified
-- [ ] `localhost` host permission justified (optional local agent)
-- [ ] No wildcard `<all_urls>` host permissions
-- [ ] `default_popup` path is correct: `popup/popup.html`
-- [ ] `options_page` path is correct: `popup/options.html`
-- [ ] Service worker path correct: `background.js`
-- [ ] All content script paths exist in the ZIP
+- [x] `manifest_version`: 3
+- [x] `version`: matches `package.json` version (`0.2.0`)
+- [x] `description` is present and under 132 characters (105 chars)
+- [x] `homepage_url` set to `https://smilintux.org`
+- [x] All `host_permissions` are minimal and justified
+- [x] `localhost` host permission justified (optional local agent)
+- [x] No wildcard `<all_urls>` host permissions
+- [x] `default_popup` path is correct: `popup/popup.html`
+- [x] `options_page` path is correct: `popup/options.html`
+- [x] Service worker path correct: `background.js`
+- [x] All content script paths exist in the ZIP
 
 ---
 
@@ -142,4 +142,4 @@ Before submitting, test the extension manually:
 
 ---
 
-*Last updated: 2026-02-28*
+*Last updated: 2026-02-28 — A/B sections verified and marked complete by agent sonnet (task e13f6c51)*

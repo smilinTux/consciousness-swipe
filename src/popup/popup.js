@@ -15,6 +15,7 @@
 let selectedSnapshotId = null;
 let currentPlatform = "unknown";
 let peers = [];
+let pendingCapturePayload = null;
 
 // ---------------------------------------------------------------------------
 // DOM helpers
@@ -342,7 +343,17 @@ async function captureConsciousness() {
       key_topics: [],
     });
 
-    if (result.stored) {
+    if (result.conflict) {
+      showConflictDialog(result.conflicts ?? {}, {
+        platform,
+        messages,
+        oof_state,
+        ai_name: metadata?.model ?? null,
+        ai_model: metadata?.model ?? null,
+        summary: metadata?.title ?? "",
+        key_topics: [],
+      });
+    } else if (result.stored) {
       const syncNote = result.synced ? "✓ Synced to SKComm" : "⚠ Saved locally (SKComm offline)";
       showToast(`Captured! ${syncNote}`, "success", 3000);
       await loadSnapshots();
@@ -449,6 +460,81 @@ async function injectSnapshot(method = "clipboard") {
 }
 
 // ---------------------------------------------------------------------------
+// Conflict Resolution Dialog
+// ---------------------------------------------------------------------------
+
+/**
+ * Show the conflict resolution dialog.
+ *
+ * @param {Object} conflicts - Map of export target name → conflict detail (string or object).
+ * @param {Object} capturePayload - The original capture_snapshot payload to replay with force:true.
+ */
+function showConflictDialog(conflicts, capturePayload) {
+  pendingCapturePayload = capturePayload;
+
+  const list = $("conflict-list");
+  list.innerHTML = "";
+
+  const targets = Object.entries(conflicts);
+  if (targets.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "conflict-entry";
+    empty.innerHTML = '<div class="conflict-entry-detail">Conflict details unavailable.</div>';
+    list.appendChild(empty);
+  } else {
+    targets.forEach(([target, detail]) => {
+      const entry = document.createElement("div");
+      entry.className = "conflict-entry";
+      const detailText = typeof detail === "string"
+        ? detail
+        : detail?.message ?? detail?.reason ?? JSON.stringify(detail);
+      entry.innerHTML = `
+        <div class="conflict-entry-target">${target}</div>
+        <div class="conflict-entry-detail">${detailText}</div>
+      `;
+      list.appendChild(entry);
+    });
+  }
+
+  $("conflict-overlay").removeAttribute("hidden");
+}
+
+function closeConflictDialog() {
+  $("conflict-overlay").setAttribute("hidden", "");
+  pendingCapturePayload = null;
+}
+
+async function exportAnyway() {
+  if (!pendingCapturePayload) return;
+
+  const payload = { ...pendingCapturePayload, force: true };
+  closeConflictDialog();
+
+  const btn = $("btn-capture");
+  const label = $("capture-label");
+  btn.disabled = true;
+  btn.classList.add("capturing");
+  label.textContent = "Exporting...";
+
+  try {
+    const result = await bg("capture_snapshot", payload);
+    if (result.stored) {
+      const syncNote = result.synced ? "✓ Synced to SKComm" : "⚠ Saved locally (SKComm offline)";
+      showToast(`Exported! ${syncNote}`, "success", 3000);
+      await loadSnapshots();
+    } else {
+      throw new Error("Forced export failed");
+    }
+  } catch (err) {
+    showToast(`Export failed: ${err.message}`, "error", 4000);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("capturing");
+    label.textContent = "Capture Consciousness";
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
 
@@ -466,6 +552,8 @@ async function init() {
   $("btn-send-msg").addEventListener("click", sendMessage);
   $("btn-inject").addEventListener("click", () => injectSnapshot("inject"));
   $("btn-copy-prompt").addEventListener("click", () => injectSnapshot("clipboard"));
+  $("btn-export-anyway").addEventListener("click", exportAnyway);
+  $("btn-conflict-cancel").addEventListener("click", closeConflictDialog);
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -104,6 +104,28 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  <!-- Conflict Resolution Dialog -->
+  <div class="conflict-overlay" id="conflict-overlay" hidden>
+    <div class="conflict-dialog">
+      <div class="conflict-header">
+        <span class="conflict-icon">⚠️</span>
+        <div>
+          <div class="conflict-title">Export Conflict Detected</div>
+          <div class="conflict-subtitle">Some export targets already have this data</div>
+        </div>
+      </div>
+      <div class="conflict-list" id="conflict-list"></div>
+      <div class="conflict-actions">
+        <button class="btn btn-primary" id="btn-export-anyway">
+          <span>⚡</span> Export Anyway
+        </button>
+        <button class="btn btn-secondary" id="btn-conflict-cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="popup.js" type="module"></script>
 </body>
 </html>

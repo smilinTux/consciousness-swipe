@@ -63,6 +63,13 @@ const DOM_FINGERPRINTS = {
     '[class*="CodeiumChat"]',
     '[class*="WindsurfChat"]',
   ],
+  codeium: [
+    '[data-testid*="codeium-chat"]',
+    '[class*="CodeiumChat"]',
+    '[class*="codeium-chat"]',
+    'codeium-ai-turn',
+    'codeium-user-turn',
+  ],
 };
 
 /**

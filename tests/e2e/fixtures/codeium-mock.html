@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!--
+  Mock HTML fixture for Codeium web chat scraping tests.
+  Simulates codeium.com chat page DOM structure for:
+    - scrapeViaRoleSelectors() — data-testid and data-role attributes
+    - scrapeViaChatPanel()     — container-walk strategy
+    - scrapeGeneric()          — article fallback
+    - Chrome stripping         — buttons, copy icons, toolbars
+    - Code block extraction    — pre/code with language annotation
+    - Timestamp extraction     — time[datetime] elements
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Codeium – Chat</title>
+</head>
+<body data-testid="codeium-app">
+
+  <!-- Model selector (for version detection) -->
+  <div class="ModelName" aria-label="model">GPT-4o</div>
+
+  <!-- =====================================================================
+       SCENARIO A: role-selector strategy
+       data-testid / data-role attributes — primary happy path
+       ===================================================================== -->
+  <section id="scenario-a-role-selectors">
+
+    <div data-testid="user-message">
+      Hello Codeium, can you help me write a Python function?
+      <button aria-label="copy">Copy</button>
+    </div>
+
+    <div data-testid="assistant-message">
+      Of course! Here's a simple example:
+      <pre><code class="language-python">def greet(name):
+    return f"Hello, {name}!"</code></pre>
+      <button aria-label="Copy code">Copy</button>
+      <div class="action">Regenerate</div>
+      <span class="sr-only">Screen reader only text</span>
+    </div>
+
+    <div data-role="user">
+      Can you add type hints?
+      <time datetime="2026-02-28T10:05:00Z">10:05 AM</time>
+    </div>
+
+    <div data-role="assistant">
+      Sure! Here's the updated version:
+      <pre><code class="language-python">def greet(name: str) -> str:
+    return f"Hello, {name}!"</code></pre>
+      <time datetime="2026-02-28T10:05:15Z">10:05 AM</time>
+      <button aria-label="thumbs up">👍</button>
+      <div class="toolbar">
+        <button>Accept</button>
+        <button>Reject</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- =====================================================================
+       SCENARIO B: container-walk strategy
+       .codeium-chat panel with child elements
+       ===================================================================== -->
+  <section id="scenario-b-chat-panel">
+    <div data-testid="codeium-chat">
+
+      <div class="user-message">
+        What is the Codeium Cascade engine?
+      </div>
+
+      <div class="codeium-message">
+        Cascade is Codeium's agentic AI system. It can browse your codebase,
+        write and edit files, and run terminal commands autonomously.
+        <div class="feedback">
+          <button>👍</button><button>👎</button>
+        </div>
+      </div>
+
+      <div class="user-message">
+        How does it differ from Copilot?
+      </div>
+
+      <div class="codeium-response">
+        Cascade is fully agentic — it can take multi-step actions without manual
+        approval at each step, unlike Copilot's autocomplete-focused model.
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SCENARIO C: data-message-role attribute
+       ===================================================================== -->
+  <section id="scenario-c-data-message-role">
+
+    <div data-message-role="user">
+      Show me a diff example.
+    </div>
+
+    <div data-message-role="assistant">
+      Here's a diff block:
+      <div class="diff" data-language="typescript">
+        - const x = 1;
+        + const x = 2;
+      </div>
+      <div class="badge">Modified</div>
+    </div>
+
+  </section>
+
+  <!-- =====================================================================
+       SCENARIO D: generic fallback
+       article elements (last-resort strategy)
+       ===================================================================== -->
+  <section id="scenario-d-generic">
+    <article>User: Explain async/await in JavaScript.</article>
+    <article>
+      Assistant: async/await is syntactic sugar over Promises. An async function
+      always returns a Promise. The await keyword pauses execution until the
+      Promise resolves.
+    </article>
+    <article>User: Can you show a quick example?</article>
+    <article>
+      Assistant: Sure!
+      <pre><code>async function fetchData(url) {
+  const res = await fetch(url);
+  return res.json();
+}</code></pre>
+    </article>
+  </section>
+
+  <!-- =====================================================================
+       SCENARIO E: empty page (no conversation elements)
+       Used to verify scraper returns empty messages array gracefully.
+       ===================================================================== -->
+  <section id="scenario-e-empty">
+    <p>Start a conversation with Codeium...</p>
+  </section>
+
+</body>
+</html>

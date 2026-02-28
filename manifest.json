@@ -52,6 +52,7 @@
         "src/content/scrapers/chatgpt.js",
         "src/content/scrapers/claude.js",
         "src/content/scrapers/gemini.js",
+        "src/content/scrapers/codeium.js",
         "src/content/scrapers/cursor.js",
         "src/content/scrapers/windsurf.js",
         "src/content/injector.js"
