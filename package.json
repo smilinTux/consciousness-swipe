@@ -1,0 +1,20 @@
+{
+  "name": "consciousness-swipe",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Sovereign consciousness continuity browser extension",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "node build.js --watch",
+    "test": "node tests/test_snapshot_schema.js && node tests/test_skcomm_client.js && node tests/test_oof_parser.js && node tests/test_scrapers.js && node tests/test_export.js",
+    "test:schema": "node tests/test_snapshot_schema.js",
+    "test:client": "node tests/test_skcomm_client.js",
+    "test:oof": "node tests/test_oof_parser.js",
+    "test:scrapers": "node tests/test_scrapers.js",
+    "test:export": "node tests/test_export.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}
