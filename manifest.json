@@ -25,10 +25,7 @@
     "https://codeium.com/*",
     "https://windsurf.ai/*",
     "http://localhost:9384/*",
-    "http://localhost:*/*",
-    "https://localhost:*/*",
-    "http://127.0.0.1:9384/*",
-    "http://127.0.0.1:*/*"
+    "http://127.0.0.1:9384/*"
   ],
 
   "background": {
