@@ -23,7 +23,7 @@ export class SKCommClient {
    * @param {string} [baseUrl='http://localhost:9384'] - Base URL for the SKComm API.
    * @param {number} [timeoutMs=5000] - Request timeout in milliseconds.
    */
-  constructor(baseUrl = "http://localhost:9384", timeoutMs = 5000) {
+  constructor(baseUrl = "http://127.0.0.1:9384", timeoutMs = 5000) {
     this.baseUrl = baseUrl.replace(/\/$/, "");
     this.timeoutMs = timeoutMs;
   }
@@ -93,7 +93,8 @@ export class SKCommClient {
     try {
       await this._fetch("/api/v1/status");
       return true;
-    } catch {
+    } catch (err) {
+      // Connectivity check — not an error in normal operation (offline mode expected)
       return false;
     }
   }

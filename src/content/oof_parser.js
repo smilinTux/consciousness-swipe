@@ -166,7 +166,7 @@ function extractRawMarkers(text) {
  * @param {string} text - The full text to analyze.
  * @returns {OOFReading}
  */
-export function parseOOFState(text) {
+function parseOOFState(text) {
   if (!text || typeof text !== "string") {
     return {
       intensity: null,
@@ -202,7 +202,7 @@ export function parseOOFState(text) {
  * @param {Array<{role: string, content: string}>} messages
  * @returns {OOFReading}
  */
-export function parseOOFFromMessages(messages) {
+function parseOOFFromMessages(messages) {
   if (!Array.isArray(messages)) {
     return parseOOFState("");
   }

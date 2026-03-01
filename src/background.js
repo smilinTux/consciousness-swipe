@@ -17,10 +17,24 @@
  * @module background
  */
 
+/** Set to true for development logging, false for production builds. */
+const CS_DEBUG = false;
+
+if (CS_DEBUG) console.log("[CS-SW] script start");
+
+// Catch any unhandled errors or promise rejections that could silently kill the SW
+self.addEventListener("error", (ev) => {
+  console.error("[CS-SW] Uncaught error:", ev.message, ev.filename, ev.lineno);
+});
+self.addEventListener("unhandledrejection", (ev) => {
+  console.error("[CS-SW] Unhandled rejection:", ev.reason);
+  ev.preventDefault();
+});
+
 import { SKCommClient } from "./lib/skcomm_client.js";
 import { makeSoulSnapshot, makeIndexEntry } from "./lib/snapshot_schema.js";
 
-const DEFAULT_SKCOMM_URL = "http://localhost:9384";
+const DEFAULT_SKCOMM_URL = "http://127.0.0.1:9384";
 const SYNC_ALARM = "cs_sync";
 const AUTO_CAPTURE_ALARM = "cs_auto_capture";
 const STORAGE_KEY_INDEX = "cs_snapshot_index";
@@ -113,7 +127,9 @@ function detectConflict(fingerprint, target, index) {
 // Message dispatcher
 // ---------------------------------------------------------------------------
 
+if (CS_DEBUG) console.log("[CS-SW] registering message listener");
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (CS_DEBUG) console.log("[CS-SW] message received:", message?.action);
   const { action, payload } = message;
 
   switch (action) {
@@ -182,6 +198,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 async function handleCheckConnection() {
   const client = await getClient();
+  if (CS_DEBUG) console.log("[CS-DEBUG] handleCheckConnection url=", client.baseUrl);
   const reachable = await client.isReachable();
   if (reachable) {
     try {
@@ -290,6 +307,9 @@ async function handleCaptureSnapshot(payload) {
   }
 
   // Target 3: HTTP endpoint
+  // Security: http_token is read from chrome.storage.local (sandboxed,
+  // per-extension, inaccessible to page scripts). It is only sent as a
+  // Bearer header to the user-configured endpoint URL.
   if (opts.exportHttp && opts.http_url) {
     const client = new SKCommClient(opts.apiUrl);
     try {
@@ -551,9 +571,9 @@ async function handleUpdateAutoCapture({ enabled, intervalMinutes = 5 }) {
   await chrome.alarms.clear(AUTO_CAPTURE_ALARM);
   if (enabled) {
     chrome.alarms.create(AUTO_CAPTURE_ALARM, { periodInMinutes: intervalMinutes });
-    console.log(`[CS] Auto-capture enabled: every ${intervalMinutes}m`);
+    if (CS_DEBUG) console.log(`[CS] Auto-capture enabled: every ${intervalMinutes}m`);
   } else {
-    console.log("[CS] Auto-capture disabled");
+    if (CS_DEBUG) console.log("[CS] Auto-capture disabled");
   }
   return { ok: true };
 }
@@ -648,7 +668,7 @@ async function purgeExpiredSnapshots() {
   const surviving = index.filter((e) => !expired.includes(e));
   await chrome.storage.local.set({ [STORAGE_KEY_INDEX]: surviving });
 
-  console.log(`[CS] Purged ${expired.length} expired snapshots`);
+  if (CS_DEBUG) console.log(`[CS] Purged ${expired.length} expired snapshots`);
 }
 
 // ---------------------------------------------------------------------------
@@ -694,8 +714,11 @@ async function syncPending() {
 // Alarms
 // ---------------------------------------------------------------------------
 
-// Retry pending + purge expired: every minute
-chrome.alarms.create(SYNC_ALARM, { periodInMinutes: 1 });
+// Retry pending + purge expired: every minute.
+// In Chrome 111+, chrome.alarms.create returns a Promise — catch any rejection
+// so an unhandled rejection doesn't silently terminate the service worker.
+Promise.resolve(chrome.alarms.create(SYNC_ALARM, { periodInMinutes: 1 }))
+  .catch((e) => console.error("[CS-SW] alarm create error:", e));
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === SYNC_ALARM) {
@@ -715,19 +738,25 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
       const migrated = { ...cs_options, syncthing_apiUrl: cs_options.synthing_apiUrl };
       delete migrated.synthing_apiUrl;
       await chrome.storage.local.set({ cs_options: migrated });
-      console.log("[CS] Migrated synthing_apiUrl → syncthing_apiUrl");
+      if (CS_DEBUG) console.log("[CS] Migrated synthing_apiUrl → syncthing_apiUrl");
     }
   } catch { /* non-fatal */ }
 })();
 
 // Restore auto-capture alarm on service worker restart
 (async () => {
-  const opts = await getOptions();
-  if (opts.autoCapture) {
-    const existing = await chrome.alarms.get(AUTO_CAPTURE_ALARM);
-    if (!existing) {
-      chrome.alarms.create(AUTO_CAPTURE_ALARM, { periodInMinutes: opts.autoCaptureInterval });
+  try {
+    const opts = await getOptions();
+    if (opts.autoCapture) {
+      const existing = await chrome.alarms.get(AUTO_CAPTURE_ALARM);
+      if (!existing) {
+        await Promise.resolve(
+          chrome.alarms.create(AUTO_CAPTURE_ALARM, { periodInMinutes: opts.autoCaptureInterval })
+        ).catch((e) => console.error("[CS-SW] auto-capture alarm create error:", e));
+      }
     }
+  } catch (e) {
+    console.error("[CS-SW] auto-capture alarm setup error:", e);
   }
 })();
 

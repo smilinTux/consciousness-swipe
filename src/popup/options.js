@@ -10,7 +10,7 @@
 
 const DEFAULTS = {
   // Core SKComm
-  apiUrl: "http://localhost:9384",
+  apiUrl: "http://127.0.0.1:9384",
   // Capture
   maxMessages: 200,
   promptMessages: 10,
@@ -23,12 +23,33 @@ const DEFAULTS = {
   // Export targets
   exportSkcomm: true,
   exportSyncthing: false,
-  syncthing_apiUrl: "http://localhost:9384",
+  syncthing_apiUrl: "http://127.0.0.1:9384",
   syncthing_folder: "consciousness-swipe",
   exportHttp: false,
   http_url: "",
   http_token: "",
 };
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Set a <select> element's value, falling back to a default if the stored
+ * value doesn't match any <option>.
+ *
+ * @param {string} id - Element ID
+ * @param {string} value - Desired value
+ * @param {string} fallback - Default value if desired doesn't match an option
+ */
+function setSelectValue(id, value, fallback) {
+  const el = document.getElementById(id);
+  el.value = value;
+  // If the value didn't match any option, the select resets to empty — use fallback
+  if (el.value !== value) {
+    el.value = fallback;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Load
@@ -44,11 +65,11 @@ async function load() {
   // Capture
   document.getElementById("max-messages").value = opts.maxMessages;
   document.getElementById("prompt-messages").value = opts.promptMessages;
-  document.getElementById("retention-days").value = String(opts.retentionDays);
+  setSelectValue("retention-days", String(opts.retentionDays), String(DEFAULTS.retentionDays));
 
   // Auto-capture
   document.getElementById("auto-capture").checked = opts.autoCapture;
-  document.getElementById("auto-capture-interval").value = String(opts.autoCaptureInterval);
+  setSelectValue("auto-capture-interval", String(opts.autoCaptureInterval), String(DEFAULTS.autoCaptureInterval));
   toggleAutoCaptureInterval(opts.autoCapture);
 
   // Identity
@@ -72,6 +93,12 @@ async function load() {
 // Save
 // ---------------------------------------------------------------------------
 
+// Security model: All settings including auth tokens (http_token) are stored
+// in chrome.storage.local. This is the recommended storage for browser
+// extensions — it is sandboxed per-extension, inaccessible to web pages and
+// other extensions, and encrypted at rest on disk by the browser profile.
+// We intentionally avoid localStorage and cookies, which are scoped to web
+// origins and could be read by page scripts.
 async function save() {
   const opts = {
     apiUrl: document.getElementById("api-url").value.trim() || DEFAULTS.apiUrl,
@@ -79,8 +106,10 @@ async function save() {
       parseInt(document.getElementById("max-messages").value) || DEFAULTS.maxMessages,
     promptMessages:
       parseInt(document.getElementById("prompt-messages").value) || DEFAULTS.promptMessages,
-    retentionDays:
-      parseInt(document.getElementById("retention-days").value),
+    retentionDays: (() => {
+      const v = parseInt(document.getElementById("retention-days").value);
+      return Number.isNaN(v) ? DEFAULTS.retentionDays : v;
+    })(),
     autoCapture: document.getElementById("auto-capture").checked,
     autoCaptureInterval:
       parseInt(document.getElementById("auto-capture-interval").value) || 5,

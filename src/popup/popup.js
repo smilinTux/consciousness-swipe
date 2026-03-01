@@ -46,9 +46,14 @@ function showToast(message, type = "", durationMs = 2500) {
  * @param {Object} [payload={}]
  * @returns {Promise<any>}
  */
-function bg(action, payload = {}) {
+function bg(action, payload = {}, timeoutMs = 10000) {
   return new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error("Background worker did not respond")),
+      timeoutMs
+    );
     chrome.runtime.sendMessage({ action, payload }, (response) => {
+      clearTimeout(timer);
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
       } else {
