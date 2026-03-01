@@ -218,13 +218,40 @@ function collectMessages() {
 function scrapeConversation() {
   const messages = collectMessages();
 
-  // Detect model
+  // Detect model — try multiple selectors; claude.ai changes frequently
   let model = null;
   try {
-    const modelEl = document.querySelector(
-      '[data-testid="model-selector-trigger"], [aria-label*="Claude"] button'
-    );
-    model = modelEl?.textContent?.trim() ?? null;
+    const MODEL_SELECTORS = [
+      // data-testid variants (most stable)
+      '[data-testid="model-selector-trigger"]',
+      '[data-testid="model-selector"]',
+      '[data-testid*="model-selector"]',
+      // aria / button patterns
+      'button[aria-label*="Claude"]',
+      'button[aria-haspopup="listbox"]',
+      // class heuristics
+      '[class*="ModelSelector"] button',
+      '[class*="model-selector"] button',
+      '[class*="ModelPicker"] button',
+      // fallback: any button whose text looks like a Claude model
+      ...Array.from(document.querySelectorAll('button')).filter((b) =>
+        /claude\s+(sonnet|opus|haiku|3|3\.5|4)/i.test(b.textContent)
+      ),
+    ];
+    for (const sel of MODEL_SELECTORS) {
+      const el = typeof sel === "string" ? document.querySelector(sel) : sel;
+      const text = el?.textContent?.trim();
+      if (text && text.length > 0 && text.length < 60) {
+        model = text;
+        break;
+      }
+    }
+    // Last resort: extract model from page title ("Claude Sonnet · Project Name")
+    if (!model) {
+      const title = document.title ?? "";
+      const match = title.match(/claude[\s-]*(sonnet|opus|haiku|3[\s.]?5?|4[\s.]?\d*)/i);
+      if (match) model = match[0].trim();
+    }
   } catch { /* skip */ }
 
   let title = null;

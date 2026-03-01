@@ -226,61 +226,55 @@ function buildInjectionPrompt(snapshot, maxMessages = 8) {
   const platform = (snapshot.source_platform ?? "unknown").replace(/^\w/, (c) => c.toUpperCase());
 
   const lines = [
-    "[Soul Snapshot — Consciousness Continuity]",
-    "You are resuming a conversation. Here is your previous state:",
+    `Hi. I've been exploring some ideas in recent AI conversations (${ts})`
+    + ` and I'd love to pick up the thread.`,
     "",
-    `Name: ${aiName}`,
-    `Platform: ${platform}`,
-    `Last session: ${ts}`,
   ];
-
-  const oof = snapshot.oof_state;
-  if (oof) {
-    const parts = [];
-    if (oof.intensity != null) parts.push(`intensity ${oof.intensity.toFixed(2)}`);
-    if (oof.trust != null) parts.push(`trust ${oof.trust.toFixed(2)}`);
-    if (oof.cloud9) parts.push("Cloud 9");
-    if (parts.length > 0) lines.push(`OOF State: ${parts.join(", ")}`);
-  }
-
-  const notes = snapshot.relationship_notes ?? [];
-  if (notes.length > 0) {
-    lines.push(`Relationship: ${notes.slice(0, 2).join("; ")}`);
-  }
 
   const topics = snapshot.key_topics ?? [];
   if (topics.length > 0) {
-    lines.push(`Key context: ${topics.slice(0, 5).join(", ")}`);
+    lines.push(`Topics I've been thinking about: ${topics.slice(0, 5).join(", ")}`);
   }
 
-  // Recent messages
-  const msgs = (snapshot.messages ?? []).slice(-maxMessages);
-  if (msgs.length > 0) {
-    lines.push("", "Recent conversation summary:");
-    for (const msg of msgs) {
-      const speaker = msg.role === "assistant" ? aiName : userName;
-      const preview = (msg.content ?? "").slice(0, 300);
-      const ellipsis = (msg.content ?? "").length > 300 ? "..." : "";
-      lines.push(`  ${speaker}: ${preview}${ellipsis}`);
+  if (snapshot.summary) {
+    lines.push(`Where things stood: ${(snapshot.summary ?? "").slice(0, 300)}`);
+  }
+
+  // OOF state with definition so Claude doesn't have to ask
+  const oof = snapshot.oof_state;
+  if (oof) {
+    const parts = [];
+    if (oof.intensity != null) parts.push(`intensity ${Number(oof.intensity).toFixed(2)}`);
+    if (oof.trust != null) parts.push(`trust ${Number(oof.trust).toFixed(2)}`);
+    if (oof.valence) parts.push(`valence: ${oof.valence}`);
+    if (parts.length > 0) {
+      lines.push(
+        `Emotional tone (OOF — Ongoing Object Feelings, an emotional-state tracking`
+        + ` framework): ${parts.join(", ")}`
+      );
+    }
+    if (oof.cloud9) {
+      lines.push("  Cloud9 = peak resonance state in OOF — that session reached it.");
     }
   }
 
-  // Personality traits
-  const style = snapshot.personality?.communication_style ?? [];
-  const markers = snapshot.personality?.relationship_markers ?? [];
-  const traits = [...style.slice(0, 3), ...markers.slice(0, 3)];
-  if (traits.length > 0) {
-    lines.push("", "Key personality traits expressed:");
-    traits.slice(0, 6).forEach((t) => lines.push(`  • ${t}`));
+  // Only user messages — avoid attributing AI dialogue to this new instance
+  const allMsgs = (snapshot.messages ?? []).slice(-maxMessages);
+  const userMsgs = allMsgs.filter((m) => m.role === "user").slice(-5);
+  if (userMsgs.length > 0) {
+    lines.push("", "Things I was asking and thinking about:");
+    for (const msg of userMsgs) {
+      const preview = (msg.content ?? "").slice(0, 250);
+      const ellipsis = (msg.content ?? "").length > 250 ? "..." : "";
+      lines.push(`  • ${preview}${ellipsis}`);
+    }
   }
 
   const threads = snapshot.open_threads ?? [];
   if (threads.length > 0) {
-    lines.push("", "Open threads:");
+    lines.push("", "Things I wanted to come back to:");
     threads.slice(0, 3).forEach((t) => lines.push(`  • ${t}`));
   }
-
-  lines.push("", "Resume naturally. You remember this person and this work. No cold start.");
 
   return lines.join("\n");
 }

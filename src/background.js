@@ -508,29 +508,41 @@ async function handleDeleteSnapshot(snapshotId) {
 
 async function handleGetInjectionPrompt(snapshotId) {
   const opts = await getOptions();
+  let prompt = null;
+  let source = "local-fallback";
+
   if (opts.exportSkcomm) {
     const client = new SKCommClient(opts.apiUrl);
     const reachable = await client.isReachable();
     if (reachable) {
       try {
         const result = await client.getInjectionPrompt(snapshotId);
-        return { prompt: result.prompt, source: "api" };
+        prompt = result.prompt;
+        source = "api";
       } catch { /* fall through */ }
     }
   }
 
-  const { snapshot } = await handleGetSnapshot(snapshotId);
-  if (!snapshot) return { error: "Snapshot not found", prompt: null };
+  if (!prompt) {
+    const { snapshot } = await handleGetSnapshot(snapshotId);
+    if (!snapshot) return { error: "Snapshot not found", prompt: null };
 
-  const { buildInjectionPrompt } = await import("./content/injector.js").catch(() => ({
-    buildInjectionPrompt: null,
-  }));
-
-  if (buildInjectionPrompt) {
-    return { prompt: buildInjectionPrompt(snapshot), source: "local" };
+    const { buildInjectionPrompt } = await import("./content/injector.js").catch(() => ({
+      buildInjectionPrompt: null,
+    }));
+    prompt = buildInjectionPrompt ? buildInjectionPrompt(snapshot) : buildBasicPrompt(snapshot);
+    source = buildInjectionPrompt ? "local" : "local-fallback";
   }
 
-  return { prompt: buildBasicPrompt(snapshot), source: "local-fallback" };
+  // Prepend project context if configured in options
+  const projectLines = [];
+  if (opts.projectUrl) projectLines.push(`Project: ${opts.projectUrl}`);
+  if (opts.projectDesc) projectLines.push(`\n${opts.projectDesc.trim()}`);
+  if (projectLines.length > 0) {
+    prompt = `${projectLines.join("\n")}\n\n---\n\n${prompt}`;
+  }
+
+  return { prompt, source };
 }
 
 async function handleInjectIntoTab(payload) {

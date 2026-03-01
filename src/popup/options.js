@@ -28,6 +28,9 @@ const DEFAULTS = {
   exportHttp: false,
   http_url: "",
   http_token: "",
+  // Project context (prepended to injections)
+  projectUrl: "",
+  projectDesc: "",
 };
 
 // ---------------------------------------------------------------------------
@@ -74,6 +77,10 @@ async function load() {
 
   // Identity
   document.getElementById("user-name").value = opts.userName;
+
+  // Project context
+  document.getElementById("project-url").value = opts.projectUrl;
+  document.getElementById("project-desc").value = opts.projectDesc;
 
   // Export targets
   document.getElementById("export-skcomm").checked = opts.exportSkcomm;
@@ -124,6 +131,8 @@ async function save() {
     exportHttp: document.getElementById("export-http").checked,
     http_url: document.getElementById("http-url").value.trim(),
     http_token: document.getElementById("http-token").value.trim(),
+    projectUrl: document.getElementById("project-url").value.trim(),
+    projectDesc: document.getElementById("project-desc").value.trim(),
   };
 
   await chrome.storage.local.set({ cs_options: opts });

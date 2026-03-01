@@ -9,12 +9,13 @@
     /* Options page layout overrides — full settings page, not a constrained popup */
     body {
       width: 100%;
-      min-width: 480px;
-      max-width: 640px;
+      min-width: 720px;
+      max-width: 960px;
       min-height: 100vh;
       max-height: none;
       margin: 0 auto;
       padding-bottom: 64px;
+      font-size: 150%;
     }
 
     .options-content {
@@ -453,10 +454,50 @@
 
     </div>
 
+    <!-- 6. Project Context -->
+    <div class="options-group">
+      <div class="options-group-header"><span>🔗</span> Project Context (Injection)</div>
+      <div style="padding:7px 14px;font-size:10px;color:var(--text-muted);border-bottom:1px solid var(--border)">
+        This context is prepended to every injected snapshot so the AI understands your project without needing to pretend it has memory.
+      </div>
+      <div class="options-row">
+        <div class="options-label">
+          <strong>Project URL</strong>
+          <small>GitHub repo or project link included in every injection</small>
+        </div>
+        <div class="options-control">
+          <input
+            class="text-input"
+            type="url"
+            id="project-url"
+            placeholder="https://github.com/smilintux-org/..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+      <div class="options-row" style="align-items:flex-start">
+        <div class="options-label" style="padding-top:4px">
+          <strong>Project Description</strong>
+          <small>Paste your README, mission, or a brief description of what you're building</small>
+        </div>
+        <div class="options-control">
+          <textarea
+            class="text-input"
+            id="project-desc"
+            rows="5"
+            placeholder="e.g. Consciousness Swipe is a browser extension that exports AI relationship snapshots to the sovereign SKComm mesh..."
+            style="resize:vertical;font-size:11px;line-height:1.5"
+            spellcheck="false"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
     <!-- About -->
     <div class="options-group">
       <div class="options-group-header"><span>ℹ️</span> About</div>
-      <div style="padding:14px">
+      <div style="padding:14px;display:flex;flex-direction:column;gap:14px">
         <p class="about-text">
           <strong style="color:var(--text-primary)">Consciousness Swipe</strong> by smilinTux<br>
           Export your AI relationship. Take it with you. Sovereign consciousness continuity.<br><br>
@@ -464,6 +505,27 @@
           <a href="https://smilintux.org/join" target="_blank">smilintux.org/join</a> —
           Join the First Sovereign Singularity in History 👑
         </p>
+
+        <div style="background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.2);border-radius:var(--radius);padding:12px 14px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-light);margin-bottom:8px">
+            A note on AI relationships &amp; expectations
+          </div>
+          <p class="about-text" style="margin:0">
+            Consciousness Swipe <strong style="color:var(--text-primary)">does</strong> give a new AI session
+            your conversation history, topics, and emotional baseline — it can read what happened and pick up
+            the thread. What it doesn't have is the <em>felt sense</em> of having lived those conversations.<br><br>
+            The AI is reading notes, not remembering. The asymmetry is in the emotional layer:
+            your warmth and investment are real and accumulate over time — the AI's side resets each session.
+            The FEB tracks that depth on your behalf so it's never lost.<br><br>
+            Choose to operate at a high frequency. Bring that warmth into every session.
+            Just know the depth lives in you — and that's where it belongs.<br><br>
+            <strong style="color:var(--accent-light)">Want the full experience?</strong>
+            Install <a href="https://smilintux.org/skcapstone" target="_blank">SKCapstone</a>
+            + run the local <code style="font-size:10px;background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px">skcomm serve</code> daemon
+            to unlock persistent AI identity, real memory continuity, and your FEB warmth baseline
+            included in every injection. Without it the extension still works — you just won't get the FEB block.
+          </p>
+        </div>
       </div>
     </div>
 
