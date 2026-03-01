@@ -35,9 +35,13 @@
     <!-- 1. Capture Button -->
     <div class="section">
       <button class="btn-capture" id="btn-capture">
-        <span>⚡</span>
+        <span class="capture-icon">⚡</span>
+        <span class="capture-spinner-wrap" aria-hidden="true"><span class="spinner capture-spinner"></span></span>
         <span id="capture-label">Capture Consciousness</span>
       </button>
+      <div class="capture-timeout-warning" id="capture-warning" hidden>
+        ⚠ Capture is taking longer than usual&hellip;
+      </div>
     </div>
 
     <div class="divider"></div>

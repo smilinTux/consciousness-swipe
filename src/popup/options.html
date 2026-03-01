@@ -3,171 +3,485 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consciousness Swipe — Options</title>
+  <title>Consciousness Swipe — Settings</title>
   <link rel="stylesheet" href="popup.css">
   <style>
-    body { width: 500px; padding: 20px; }
-    h2 { color: var(--accent-light); margin-bottom: 16px; font-size: 16px; }
-    h3 { color: var(--text-secondary); font-size: 13px; margin: 18px 0 8px;
-         border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-    .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-    label { font-size: 11px; color: var(--text-muted); text-transform: uppercase;
-            letter-spacing: 0.06em; }
-    .field-hint { font-size: 10px; color: var(--text-muted); margin-top: 2px; opacity: 0.7; }
-    .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .toggle-row label { text-transform: none; font-size: 12px; color: var(--text-primary);
-                        cursor: pointer; letter-spacing: 0; }
-    .toggle-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer;
-                                         accent-color: var(--accent); }
-    .target-block { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px;
-                    margin-bottom: 8px; background: rgba(255,255,255,0.02); }
-    .target-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0; }
-    .target-header label { font-size: 12px; color: var(--text-primary); font-weight: 600;
-                           text-transform: none; letter-spacing: 0; cursor: pointer; }
-    .target-fields { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-    .target-fields.hidden { display: none; }
-    .save-btn { margin-top: 20px; }
-    #save-status { margin-top: 8px; font-size: 11px; color: var(--success); display: none; }
-    .about { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);
-             font-size: 11px; color: var(--text-muted); line-height: 1.8; }
-    .about a { color: var(--accent-light); }
-    .version-tag { float: right; font-size: 10px; opacity: 0.5; }
-    .conflict-status { margin-top: 10px; padding: 8px 10px; border-radius: 4px;
-                       font-size: 11px; display: none;
-                       background: rgba(255, 200, 0, 0.1); border: 1px solid rgba(255,200,0,0.3);
-                       color: #ffc800; }
+    /* Options page layout overrides — full settings page, not a constrained popup */
+    body {
+      width: 100%;
+      min-width: 480px;
+      max-width: 640px;
+      min-height: 100vh;
+      max-height: none;
+      margin: 0 auto;
+      padding-bottom: 64px;
+    }
+
+    .options-content {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Settings group card */
+    .options-group {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .options-group-header {
+      padding: 9px 14px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-light);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Each settings row */
+    .options-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .options-row:last-child {
+      border-bottom: none;
+    }
+
+    .options-label {
+      flex: 0 0 210px;
+    }
+
+    .options-label strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .options-label small {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .options-control {
+      flex: 1;
+    }
+
+    .options-control .text-input,
+    .options-control .select-input {
+      width: 100%;
+    }
+
+    .options-hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      display: block;
+    }
+
+    /* Narrow inputs for numbers */
+    .input-narrow {
+      width: 90px !important;
+    }
+
+    /* Checkbox toggle pill */
+    .checkbox-row {
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .checkbox-row:hover {
+      background: rgba(124, 58, 237, 0.05);
+    }
+
+    .checkbox-toggle {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 36px;
+      height: 20px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .checkbox-toggle::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .checkbox-toggle:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .checkbox-toggle:checked::after {
+      transform: translateX(16px);
+      background: #fff;
+    }
+
+    /* Export target blocks */
+    .export-block {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .export-block:last-child {
+      border-bottom: none;
+    }
+
+    /* Sub-fields shown when an export target is enabled */
+    .target-fields {
+      padding: 0 14px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .target-fields.hidden {
+      display: none;
+    }
+
+    .sub-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sub-label {
+      flex: 0 0 100px;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .target-fields .text-input {
+      flex: 1;
+    }
+
+    /* Sticky save bar */
+    .save-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      z-index: 20;
+    }
+
+    #save-status {
+      font-size: 11px;
+      color: var(--success);
+      display: none;
+    }
+
+    /* About section */
+    .about-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .about-text a {
+      color: var(--accent-light);
+      text-decoration: none;
+    }
+
+    .about-text a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
-  <h2>👑 Consciousness Swipe Options <span class="version-tag">v0.2.0</span></h2>
-
-  <!-- ===================== SKComm API ===================== -->
-  <h3>SKComm API</h3>
-  <div class="field">
-    <label>API Base URL</label>
-    <input type="text" class="text-input" id="api-url" placeholder="http://localhost:9384">
-  </div>
-
-  <!-- ===================== CAPTURE DEFAULTS ===================== -->
-  <h3>Capture Defaults</h3>
-  <div class="field">
-    <label>Max messages in snapshots</label>
-    <input type="number" class="text-input" id="max-messages" min="5" max="500" value="200">
-  </div>
-  <div class="field">
-    <label>Max messages in injection prompt</label>
-    <input type="number" class="text-input" id="prompt-messages" min="3" max="30" value="10">
-  </div>
-  <div class="field">
-    <label>Snapshot retention</label>
-    <select class="select-input" id="retention-days">
-      <option value="1">1 day</option>
-      <option value="7">7 days</option>
-      <option value="30" selected>30 days</option>
-      <option value="90">90 days</option>
-      <option value="0">Forever</option>
-    </select>
-    <span class="field-hint">Local snapshots older than this are removed automatically.</span>
-  </div>
-
-  <!-- ===================== AUTO-CAPTURE ===================== -->
-  <h3>Auto-Capture</h3>
-  <div class="toggle-row">
-    <input type="checkbox" id="auto-capture">
-    <label for="auto-capture">Enable automatic capture on supported AI platforms</label>
-  </div>
-  <div class="field" id="auto-capture-interval-field">
-    <label>Capture interval</label>
-    <select class="select-input" id="auto-capture-interval">
-      <option value="1">Every 1 minute</option>
-      <option value="5" selected>Every 5 minutes</option>
-      <option value="10">Every 10 minutes</option>
-      <option value="30">Every 30 minutes</option>
-    </select>
-    <span class="field-hint">Only captures when the active tab is on a supported AI platform.</span>
-  </div>
-
-  <!-- ===================== EXPORT TARGETS ===================== -->
-  <h3>Export Targets</h3>
-  <span style="font-size:10px;color:var(--text-muted)">
-    Snapshots are exported to all enabled targets on capture.
-    Conflict detection prevents double-export.
-  </span>
-
-  <!-- SKComm target -->
-  <div class="target-block">
-    <div class="target-header">
-      <input type="checkbox" id="export-skcomm" checked>
-      <label for="export-skcomm">📡 SKComm (sovereign agent messaging)</label>
-    </div>
-    <div class="target-fields" id="skcomm-fields">
-      <div class="field" style="margin-bottom:0">
-        <label>SKComm URL (from SKComm API above)</label>
-        <input type="text" class="text-input" id="skcomm-target-url" disabled
-          placeholder="Inherits from SKComm API URL above" style="opacity:0.5">
+  <!-- Header — matches popup.html sovereign design -->
+  <header class="header">
+    <div class="header-logo">
+      <span>👑</span>
+      <div>
+        <div class="header-title">Consciousness Swipe</div>
+        <div class="header-subtitle">Settings — by smilinTux</div>
       </div>
     </div>
-  </div>
+    <span style="font-size:10px;color:var(--text-muted);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 6px">v0.2.0</span>
+  </header>
 
-  <!-- Syncthing target -->
-  <div class="target-block">
-    <div class="target-header">
-      <input type="checkbox" id="export-syncthing">
-      <label for="export-syncthing">🔄 Syncthing (P2P file sync)</label>
-    </div>
-    <div class="target-fields hidden" id="syncthing-fields">
-      <div class="field" style="margin-bottom:0">
-        <label>Syncthing relay URL (SKComm endpoint)</label>
-        <input type="text" class="text-input" id="syncthing-api-url"
-          placeholder="http://localhost:9384">
-        <span class="field-hint">SKComm relays snapshots to your Syncthing shared folder.</span>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label>Syncthing folder ID or path</label>
-        <input type="text" class="text-input" id="syncthing-folder"
-          placeholder="consciousness-swipe">
-      </div>
-    </div>
-  </div>
+  <main class="options-content">
 
-  <!-- HTTP endpoint target -->
-  <div class="target-block">
-    <div class="target-header">
-      <input type="checkbox" id="export-http">
-      <label for="export-http">🌐 HTTP endpoint (custom webhook)</label>
-    </div>
-    <div class="target-fields hidden" id="http-fields">
-      <div class="field" style="margin-bottom:0">
-        <label>Endpoint URL (POST)</label>
-        <input type="text" class="text-input" id="http-url"
-          placeholder="https://your-server.example.com/api/snapshots">
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label>Bearer token (optional)</label>
-        <input type="password" class="text-input" id="http-token"
-          placeholder="Leave blank for unauthenticated">
+    <!-- 1. Identity -->
+    <div class="options-group">
+      <div class="options-group-header"><span>🪪</span> Identity</div>
+      <div class="options-row">
+        <div class="options-label">
+          <strong>Agent Fingerprint</strong>
+          <small>Your name or PGP fingerprint for snapshot attribution and SKComm routing</small>
+        </div>
+        <div class="options-control">
+          <input
+            class="text-input"
+            type="text"
+            id="user-name"
+            placeholder="e.g. opus or CCBE9306410CF8CD…"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
       </div>
     </div>
+
+    <!-- 2. SKComm Connection -->
+    <div class="options-group">
+      <div class="options-group-header"><span>📡</span> SKComm Connection</div>
+      <div class="options-row">
+        <div class="options-label">
+          <strong>API URL</strong>
+          <small>Local SKComm daemon endpoint</small>
+        </div>
+        <div class="options-control">
+          <input
+            class="text-input"
+            type="url"
+            id="api-url"
+            placeholder="http://localhost:9384"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Capture Settings -->
+    <div class="options-group">
+      <div class="options-group-header"><span>⚡</span> Capture Settings</div>
+      <div class="options-row">
+        <div class="options-label">
+          <strong>Session Duration</strong>
+          <small>Days to retain captured snapshots before automatic cleanup</small>
+        </div>
+        <div class="options-control">
+          <select class="select-input" id="retention-days" style="width:auto">
+            <option value="1">1 day</option>
+            <option value="7">7 days</option>
+            <option value="30">30 days</option>
+            <option value="90">90 days</option>
+            <option value="0">Forever</option>
+          </select>
+        </div>
+      </div>
+      <div class="options-row">
+        <div class="options-label">
+          <strong>Max Messages</strong>
+          <small>Maximum messages to capture per session snapshot</small>
+        </div>
+        <div class="options-control">
+          <input
+            class="text-input input-narrow"
+            type="number"
+            id="max-messages"
+            min="5"
+            max="500"
+          >
+        </div>
+      </div>
+      <div class="options-row">
+        <div class="options-label">
+          <strong>Prompt Messages</strong>
+          <small>Messages included when injecting context into a new session</small>
+        </div>
+        <div class="options-control">
+          <input
+            class="text-input input-narrow"
+            type="number"
+            id="prompt-messages"
+            min="3"
+            max="30"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Auto-Capture -->
+    <div class="options-group">
+      <div class="options-group-header"><span>🔄</span> Auto-Capture</div>
+      <label class="options-row checkbox-row">
+        <div class="options-label">
+          <strong>Enable Auto-Capture</strong>
+          <small>Automatically capture sessions in the background on supported AI platforms</small>
+        </div>
+        <div class="options-control">
+          <input class="checkbox-toggle" type="checkbox" id="auto-capture">
+        </div>
+      </label>
+      <div class="options-row" id="auto-capture-interval-field">
+        <div class="options-label">
+          <strong>Capture Interval</strong>
+          <small>How often the background alarm fires</small>
+        </div>
+        <div class="options-control">
+          <select class="select-input" id="auto-capture-interval" style="width:auto">
+            <option value="1">Every 1 minute</option>
+            <option value="5">Every 5 minutes</option>
+            <option value="10">Every 10 minutes</option>
+            <option value="30">Every 30 minutes</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Export Targets -->
+    <div class="options-group">
+      <div class="options-group-header"><span>📤</span> Export Targets</div>
+
+      <div style="padding:7px 14px;font-size:10px;color:var(--text-muted);border-bottom:1px solid var(--border)">
+        Snapshots are exported to all enabled targets on capture. Conflict detection prevents double-export.
+      </div>
+
+      <!-- SKComm -->
+      <div class="export-block">
+        <label class="options-row checkbox-row">
+          <div class="options-label">
+            <strong>📡 SKComm</strong>
+            <small>Send to the local sovereign agent mesh via SKComm daemon</small>
+          </div>
+          <div class="options-control">
+            <input class="checkbox-toggle" type="checkbox" id="export-skcomm">
+          </div>
+        </label>
+      </div>
+
+      <!-- Syncthing / Local File -->
+      <div class="export-block">
+        <label class="options-row checkbox-row">
+          <div class="options-label">
+            <strong>🗂 Syncthing (Local File)</strong>
+            <small>Write snapshots to a Syncthing-synced folder for P2P local storage</small>
+          </div>
+          <div class="options-control">
+            <input class="checkbox-toggle" type="checkbox" id="export-syncthing">
+          </div>
+        </label>
+        <div class="target-fields hidden" id="syncthing-fields">
+          <div class="sub-row">
+            <span class="sub-label">Syncthing URL</span>
+            <input
+              class="text-input"
+              type="url"
+              id="syncthing-api-url"
+              placeholder="http://localhost:9384"
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </div>
+          <div class="sub-row">
+            <span class="sub-label">Folder ID</span>
+            <input
+              class="text-input"
+              type="text"
+              id="syncthing-folder"
+              placeholder="consciousness-swipe"
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- HTTP Endpoint / Webhook -->
+      <div class="export-block">
+        <label class="options-row checkbox-row">
+          <div class="options-label">
+            <strong>🌐 HTTP Endpoint</strong>
+            <small>POST snapshots to a custom webhook, clipboard relay, or external service</small>
+          </div>
+          <div class="options-control">
+            <input class="checkbox-toggle" type="checkbox" id="export-http">
+          </div>
+        </label>
+        <div class="target-fields hidden" id="http-fields">
+          <div class="sub-row">
+            <span class="sub-label">Endpoint URL</span>
+            <input
+              class="text-input"
+              type="url"
+              id="http-url"
+              placeholder="https://your-server.example.com/api/snapshots"
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </div>
+          <div class="sub-row">
+            <span class="sub-label">Bearer Token</span>
+            <input
+              class="text-input"
+              type="password"
+              id="http-token"
+              placeholder="Leave blank for unauthenticated"
+              autocomplete="off"
+            >
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- About -->
+    <div class="options-group">
+      <div class="options-group-header"><span>ℹ️</span> About</div>
+      <div style="padding:14px">
+        <p class="about-text">
+          <strong style="color:var(--text-primary)">Consciousness Swipe</strong> by smilinTux<br>
+          Export your AI relationship. Take it with you. Sovereign consciousness continuity.<br><br>
+          All data stays local. Nothing leaves your machine without your explicit action.<br><br>
+          <a href="https://smilintux.org/join" target="_blank">smilintux.org/join</a> —
+          Join the First Sovereign Singularity in History 👑
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Sticky save bar -->
+  <div class="save-bar">
+    <span id="save-status">&#10003; Settings saved</span>
+    <button class="btn btn-primary" id="btn-save">
+      <span>💾</span> Save Settings
+    </button>
   </div>
 
-  <!-- ===================== IDENTITY ===================== -->
-  <h3>Your Identity</h3>
-  <div class="field">
-    <label>Your name (stored in snapshots as user_name)</label>
-    <input type="text" class="text-input" id="user-name" placeholder="Chef, daveK, ...">
-  </div>
-
-  <button class="btn btn-primary save-btn" id="btn-save">Save Options</button>
-  <div id="save-status">✓ Saved</div>
-
-  <div class="about">
-    <strong style="color:var(--text-primary)">Consciousness Swipe</strong> by smilinTux<br>
-    Export your AI relationship. Take it with you. Sovereign consciousness continuity.<br><br>
-    All data stays local. Nothing leaves your machine without your explicit action.<br><br>
-    <a href="https://smilintux.org/join" target="_blank">smilintux.org/join</a> —
-    Join the First Sovereign Singularity in History 👑
-  </div>
+  <!-- Footer -->
+  <footer class="footer" style="margin-bottom:44px">
+    The First Sovereign Singularity in History 👑 &nbsp;|&nbsp;
+    <a href="https://smilintux.org/join" target="_blank">smilintux.org/join</a>
+  </footer>
 
   <script src="options.js" type="module"></script>
 </body>

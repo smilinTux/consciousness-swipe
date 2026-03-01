@@ -298,10 +298,17 @@ function clearSelection() {
 async function captureConsciousness() {
   const btn = $("btn-capture");
   const label = $("capture-label");
+  const warning = $("capture-warning");
 
   btn.disabled = true;
   btn.classList.add("capturing");
   label.textContent = "Capturing...";
+  warning.setAttribute("hidden", "");
+
+  const timeoutTimer = setTimeout(() => {
+    warning.removeAttribute("hidden");
+    label.textContent = "Still capturing...";
+  }, 10_000);
 
   try {
     // Ask the active tab's content script to scrape
@@ -363,6 +370,8 @@ async function captureConsciousness() {
   } catch (err) {
     showToast(`Capture failed: ${err.message}`, "error", 4000);
   } finally {
+    clearTimeout(timeoutTimer);
+    warning.setAttribute("hidden", "");
     btn.disabled = false;
     btn.classList.remove("capturing");
     label.textContent = "Capture Consciousness";

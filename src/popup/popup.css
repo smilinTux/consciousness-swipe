@@ -210,6 +210,49 @@ body {
   50% { box-shadow: 0 4px 30px rgba(124, 58, 237, 0.7); }
 }
 
+/* Capture button spinner state */
+.capture-spinner-wrap {
+  display: none;
+  align-items: center;
+}
+
+.btn-capture.capturing .capture-icon {
+  display: none;
+}
+
+.btn-capture.capturing .capture-spinner-wrap {
+  display: inline-flex;
+}
+
+.capture-spinner {
+  width: 18px;
+  height: 18px;
+  border-width: 2.5px;
+}
+
+/* Timeout warning */
+.capture-timeout-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--warning);
+  animation: fadeInDown 0.3s ease;
+}
+
+.capture-timeout-warning[hidden] {
+  display: none;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ---------- Generic Buttons ---------- */
 
 .btn {
