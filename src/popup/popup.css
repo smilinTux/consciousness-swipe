@@ -76,6 +76,27 @@ body {
   margin-top: 1px;
 }
 
+/* ---------- Gear / Settings Button ---------- */
+
+.btn-gear {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px 6px;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+  flex-shrink: 0;
+}
+
+.btn-gear:hover {
+  color: var(--accent-light);
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
 /* ---------- Status Bar ---------- */
 
 .status-bar {

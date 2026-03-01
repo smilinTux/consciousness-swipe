@@ -554,6 +554,7 @@ async function init() {
   $("btn-copy-prompt").addEventListener("click", () => injectSnapshot("clipboard"));
   $("btn-export-anyway").addEventListener("click", exportAnyway);
   $("btn-conflict-cancel").addEventListener("click", closeConflictDialog);
+  $("btn-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -37,6 +37,7 @@ const CONTENT_ENTRIES = {
   'content/scrapers/chatgpt':    'src/content/scrapers/chatgpt.js',
   'content/scrapers/claude':     'src/content/scrapers/claude.js',
   'content/scrapers/gemini':     'src/content/scrapers/gemini.js',
+  'content/scrapers/codeium':    'src/content/scrapers/codeium.js',
   'content/scrapers/cursor':     'src/content/scrapers/cursor.js',
   'content/scrapers/windsurf':   'src/content/scrapers/windsurf.js',
 };
