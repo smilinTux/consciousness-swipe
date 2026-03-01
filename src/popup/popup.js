@@ -113,7 +113,8 @@ async function updateStatus() {
     const result = await bg("check_connection");
     if (result.connected) {
       dot.className = "dot connected";
-      const identity = result.identity ?? "connected";
+      const raw = result.identity ?? "connected";
+      const identity = typeof raw === "object" ? (raw.name ?? raw.agent ?? "connected") : raw;
       text.textContent = `SKComm: ${identity}`;
     } else {
       dot.className = "dot disconnected";
@@ -340,8 +341,13 @@ async function captureConsciousness() {
     });
 
     const scrapeResult = scrapeResults?.[0]?.result;
-    if (!scrapeResult) throw new Error("Could not scrape page — try refreshing");
-    if (scrapeResult.error) throw new Error(scrapeResult.error);
+    if (!scrapeResult) throw new Error("Could not scrape page — reload the tab and try again");
+    if (scrapeResult.error) {
+      const msg = scrapeResult.platform === "unknown"
+        ? "Page not ready — reload the AI tab (Ctrl+R) and try again"
+        : scrapeResult.error;
+      throw new Error(msg);
+    }
 
     const { messages, metadata, oof_state, platform } = scrapeResult;
 

@@ -34,6 +34,47 @@ self.addEventListener("unhandledrejection", (ev) => {
 import { SKCommClient } from "./lib/skcomm_client.js";
 import { makeSoulSnapshot, makeIndexEntry } from "./lib/snapshot_schema.js";
 
+// These explicit listeners populate serviceworkerevents in the Brave/Chrome profile,
+// which is required for Brave 130+ to wake up the service worker after a restart.
+chrome.runtime.onInstalled.addListener((details) => {
+  if (CS_DEBUG) console.log("[CS-SW] installed:", details.reason);
+  // Inject content scripts into already-open matching tabs.
+  // Chrome/Brave only auto-injects into tabs opened AFTER the extension installs;
+  // existing tabs need a programmatic push.
+  const CONTENT_FILES = [
+    "content/detector.js",
+    "content/oof_parser.js",
+    "content/scrapers/chatgpt.js",
+    "content/scrapers/claude.js",
+    "content/scrapers/gemini.js",
+    "content/scrapers/codeium.js",
+    "content/scrapers/cursor.js",
+    "content/scrapers/windsurf.js",
+    "content/injector.js",
+  ];
+  const MATCH_URLS = [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://cursor.com/*",
+    "https://www.cursor.com/*",
+    "https://codeium.com/*",
+    "https://windsurf.ai/*",
+  ];
+  chrome.tabs.query({ url: MATCH_URLS }, (tabs) => {
+    for (const tab of tabs) {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: CONTENT_FILES,
+      }).catch(() => { /* tab may be restricted, ignore */ });
+    }
+  });
+});
+chrome.runtime.onStartup.addListener(() => {
+  if (CS_DEBUG) console.log("[CS-SW] browser startup");
+});
+
 const DEFAULT_SKCOMM_URL = "http://127.0.0.1:9384";
 const SYNC_ALARM = "cs_sync";
 const AUTO_CAPTURE_ALARM = "cs_auto_capture";

@@ -75,7 +75,7 @@ const contentConfig = {
 const backgroundConfig = {
   ...BASE,
   entryPoints: BACKGROUND_ENTRIES,
-  format: 'esm',
+  format: 'iife',
 };
 
 // ---------------------------------------------------------------------------
@@ -99,8 +99,9 @@ function copyStatic() {
   // Patch manifest.json: update script paths to dist layout
   const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
 
-  // Background: strip src/ prefix
+  // Background: strip src/ prefix, ensure no "type": "module" (classic script for Brave compat)
   manifest.background.service_worker = 'background.js';
+  delete manifest.background.type;
 
   // Content scripts: strip leading src/ from each path
   manifest.content_scripts = manifest.content_scripts.map((cs) => ({
