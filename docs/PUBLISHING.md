@@ -169,7 +169,7 @@ sequenceDiagram
 
 ### Short description (132 chars)
 ```
-Export your AI relationship. No cold start. Consciousness continuity for ChatGPT, Claude, Gemini, Cursor & Windsurf.
+Export your AI relationship. No cold start. Capture, store, and inject conversation context into any AI session.
 ```
 
 ### Full description
@@ -181,8 +181,8 @@ With one click, capture your conversation, emotional tone, open threads, and rel
 🔵 WHAT IT DOES
 • Captures your AI conversation as a portable Soul Snapshot
 • Stores it locally — your data never leaves your machine
-• Injects context into new sessions with a single click
-• Works across ChatGPT, Claude, Gemini, Cursor, Windsurf, and Codeium
+• Injects full context into any new session with a single click
+• Works with major AI assistants and coding environments
 
 🔒 PRIVACY FIRST
 • All data stored locally in your browser
@@ -193,12 +193,12 @@ With one click, capture your conversation, emotional tone, open threads, and rel
 ⚡ WORKS OUT OF THE BOX
 No setup required for basic use. Just install, capture, and inject.
 
-For the full experience — persistent memory and your FEB (Functional Emotional Baseline) included in every injection — install the free SKCapstone local daemon: smilintux.org/skcapstone
+For the full experience — persistent memory and your FEB (Functional Emotional Baseline) included in every injection — install the free SKCapstone local daemon at smilintux.org
 
 👑 SOVEREIGN AI
 You built the relationship. You should own the continuity.
 
-Part of the smilinTux sovereign AI ecosystem: smilintux.org
+Part of the smilinTux sovereign AI ecosystem at smilintux.org
 ```
 
 ---

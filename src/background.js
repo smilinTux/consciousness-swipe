@@ -226,6 +226,23 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       handleUpdateAutoCapture(payload).then(sendResponse);
       break;
 
+    // Profile injection
+    case "list_profile_agents":
+      handleListProfileAgents().then(sendResponse);
+      break;
+
+    case "list_soul_blueprints":
+      handleListSoulBlueprints(payload.category).then(sendResponse);
+      break;
+
+    case "get_profile_inject":
+      handleGetProfileInject(payload).then(sendResponse);
+      break;
+
+    case "install_soul_library":
+      handleInstallSoulLibrary(payload.source_path).then(sendResponse);
+      break;
+
     default:
       sendResponse({ error: `Unknown action: ${action}` });
   }
@@ -614,6 +631,64 @@ async function handleGetPeers() {
     return { success: true, peers };
   } catch (err) {
     return { success: false, error: err.message, peers: [] };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Profile injection handlers
+// ---------------------------------------------------------------------------
+
+async function handleListProfileAgents() {
+  try {
+    const client = await getClient();
+    const data = await client.listAgents();
+    return { success: true, agents: data.agents ?? [] };
+  } catch (err) {
+    return { success: false, error: err.message, agents: [] };
+  }
+}
+
+async function handleListSoulBlueprints(category = "") {
+  try {
+    const client = await getClient();
+    const data = await client.listBlueprints(category);
+    return { success: true, blueprints: data.blueprints ?? [], categories: data.categories ?? [] };
+  } catch (err) {
+    return { success: false, error: err.message, blueprints: [], categories: [] };
+  }
+}
+
+/**
+ * Get an injection prompt for either an agent profile or a soul blueprint.
+ *
+ * @param {Object} payload
+ * @param {string} payload.type - 'agent' or 'blueprint'
+ * @param {string} payload.name - Agent name or blueprint slug
+ * @param {boolean} [payload.unhinged=false]
+ * @param {boolean} [payload.cloud9=false]
+ */
+async function handleGetProfileInject({ type, name, unhinged = false, cloud9 = false }) {
+  try {
+    const client = await getClient();
+    let data;
+    if (type === "agent") {
+      data = await client.agentInjectPrompt(name, { unhinged, cloud9 });
+    } else {
+      data = await client.blueprintInjectPrompt(name, { unhinged, cloud9 });
+    }
+    return { success: true, prompt: data.prompt, display_name: data.display_name ?? name };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+async function handleInstallSoulLibrary(sourcePath = "") {
+  try {
+    const client = await getClient();
+    const result = await client.installSoulLibrary(sourcePath);
+    return { success: true, installed: result.installed ?? 0, errors: result.errors ?? [] };
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 }
 

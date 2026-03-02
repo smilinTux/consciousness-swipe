@@ -633,3 +633,159 @@ body {
 }
 
 .footer a:hover { text-decoration: underline; }
+
+/* ---------- Tab Bar ---------- */
+
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 8px 4px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab-btn:hover { color: var(--text-secondary); }
+.tab-btn.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ---------- Profile list ---------- */
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.profile-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.profile-item:hover { border-color: var(--accent); }
+.profile-item.selected {
+  border-color: var(--accent);
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.profile-item .pi-emoji { font-size: 18px; min-width: 22px; text-align: center; }
+.profile-item .pi-info { flex: 1; min-width: 0; }
+.profile-item .pi-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-item .pi-vibe {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-item .pi-category {
+  font-size: 10px;
+  color: var(--accent-light);
+  background: rgba(124, 58, 237, 0.15);
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* ---------- Profile type toggle ---------- */
+
+.profile-type-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.profile-type-btn {
+  flex: 1;
+  padding: 5px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.profile-type-btn:hover { border-color: var(--accent); color: var(--text-secondary); }
+.profile-type-btn.active {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+/* ---------- Profile modifier toggles ---------- */
+
+.profile-mods {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 0 !important;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input[type="checkbox"] { display: none; }
+
+.toggle-pill {
+  width: 28px;
+  height: 15px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.15s;
+}
+
+.toggle-pill::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 9px;
+  height: 9px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: left 0.15s, background 0.15s;
+}
+
+.toggle-label input:checked + .toggle-pill { background: var(--accent-glow); border-color: var(--accent); }
+.toggle-label input:checked + .toggle-pill::after { left: 15px; background: var(--accent-light); }

@@ -29,8 +29,17 @@
     <div class="platform-badge" id="platform-badge">detecting...</div>
   </div>
 
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="main">⚡ Capture</button>
+    <button class="tab-btn" data-tab="profiles">🎭 Profiles</button>
+  </div>
+
   <!-- Main Content -->
   <main class="content">
+
+  <!-- ======== MAIN TAB ======== -->
+  <div class="tab-panel active" id="tab-main">
 
     <!-- 1. Capture Button -->
     <div class="section">
@@ -97,6 +106,74 @@
         </button>
       </div>
     </div>
+
+  </div><!-- /tab-main -->
+
+  <!-- ======== PROFILES TAB ======== -->
+  <div class="tab-panel" id="tab-profiles">
+
+    <!-- Profile type toggle -->
+    <div class="section">
+      <div class="profile-type-toggle">
+        <button class="profile-type-btn active" id="pt-agents">🤖 My Agents</button>
+        <button class="profile-type-btn" id="pt-blueprints">🌌 Soul Library</button>
+      </div>
+    </div>
+
+    <!-- Modifiers -->
+    <div class="section profile-mods">
+      <label class="toggle-label" title="Full personality, zero hedging">
+        <input type="checkbox" id="mod-unhinged">
+        <span class="toggle-pill"></span>
+        Unhinged mode
+      </label>
+      <label class="toggle-label" title="Include Cloud 9 / OOF resonance context">
+        <input type="checkbox" id="mod-cloud9">
+        <span class="toggle-pill"></span>
+        Cloud 9 context
+      </label>
+    </div>
+
+    <!-- Agent list -->
+    <div id="panel-agents">
+      <div class="section">
+        <div id="agent-list" class="profile-list">
+          <div class="empty-state"><span class="empty-icon">🤖</span> Loading agents...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blueprint list -->
+    <div id="panel-blueprints" style="display:none">
+      <div class="section">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+          <select class="select-input" id="bp-category-filter" style="flex:1">
+            <option value="">All categories</option>
+          </select>
+          <button class="btn btn-secondary" id="btn-load-library" style="white-space:nowrap;font-size:10px;padding:4px 8px" title="Load souls from local repo or GitHub">
+            ⬇ Load
+          </button>
+        </div>
+        <div id="blueprint-list" class="profile-list">
+          <div class="empty-state"><span class="empty-icon">🌌</span> Loading soul library...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected profile actions -->
+    <div class="section" id="profile-actions" style="display:none">
+      <div class="section-label" id="profile-selected-label">Selected Profile</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-profile-inject">
+          <span>💉</span> Inject into Session
+        </button>
+        <button class="btn btn-secondary" id="btn-profile-copy">
+          <span>📋</span> Copy Prompt
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /tab-profiles -->
 
   </main>
 

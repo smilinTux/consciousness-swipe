@@ -285,4 +285,69 @@ export class SKCommClient {
       throw err;
     }
   }
+
+  // --------------------------------------------------------------------------
+  // Souls / Profiles (profile injection)
+  // --------------------------------------------------------------------------
+
+  /**
+   * List all local skcapstone agent profiles.
+   *
+   * @returns {Promise<{agents: Array, count: number}>}
+   */
+  async listAgents() {
+    return this._fetch("/api/v1/souls/agents");
+  }
+
+  /**
+   * Get injection prompt for a local agent profile.
+   *
+   * @param {string} agentName - Agent slug (e.g. 'lumina', 'jarvis').
+   * @param {Object} [opts={}]
+   * @param {boolean} [opts.unhinged=false] - Enable unhinged mode.
+   * @param {boolean} [opts.cloud9=false] - Apply Cloud9/OOF context.
+   * @returns {Promise<{agent: string, display_name: string, prompt: string}>}
+   */
+  async agentInjectPrompt(agentName, { unhinged = false, cloud9 = false } = {}) {
+    const qs = new URLSearchParams({ unhinged: String(unhinged), cloud9: String(cloud9) });
+    return this._fetch(`/api/v1/souls/agents/${encodeURIComponent(agentName)}/inject?${qs}`);
+  }
+
+  /**
+   * List installed soul blueprints.
+   *
+   * @param {string} [category] - Optional category filter.
+   * @returns {Promise<{blueprints: Array, count: number, categories: Array}>}
+   */
+  async listBlueprints(category = "") {
+    const qs = category ? `?category=${encodeURIComponent(category)}` : "";
+    return this._fetch(`/api/v1/souls/blueprints${qs}`);
+  }
+
+  /**
+   * Get injection prompt for a soul blueprint.
+   *
+   * @param {string} name - Blueprint slug (e.g. 'the-developer', 'lumina').
+   * @param {Object} [opts={}]
+   * @param {boolean} [opts.unhinged=false] - Enable unhinged mode.
+   * @param {boolean} [opts.cloud9=false] - Apply Cloud9/OOF context.
+   * @returns {Promise<{name: string, display_name: string, prompt: string}>}
+   */
+  async blueprintInjectPrompt(name, { unhinged = false, cloud9 = false } = {}) {
+    const qs = new URLSearchParams({ unhinged: String(unhinged), cloud9: String(cloud9) });
+    return this._fetch(`/api/v1/souls/blueprints/${encodeURIComponent(name)}/inject?${qs}`);
+  }
+
+  /**
+   * Trigger user-initiated soul library install from local repo or GitHub.
+   *
+   * @param {string} [sourcePath] - Optional local path to souls-blueprints/yaml/.
+   * @returns {Promise<{status: string, installed: number, errors: Array}>}
+   */
+  async installSoulLibrary(sourcePath = "") {
+    return this._fetch("/api/v1/souls/blueprints/install", {
+      method: "POST",
+      body: JSON.stringify(sourcePath ? { source_path: sourcePath } : {}),
+    });
+  }
 }

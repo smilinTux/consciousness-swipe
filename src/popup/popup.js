@@ -555,6 +555,173 @@ async function exportAnyway() {
 }
 
 // ---------------------------------------------------------------------------
+// Profiles Tab
+// ---------------------------------------------------------------------------
+
+let profileType = "agents"; // 'agents' | 'blueprints'
+let selectedProfile = null;  // { type, name, display_name }
+
+function switchProfileType(type) {
+  profileType = type;
+  selectedProfile = null;
+  $("profile-actions").style.display = "none";
+
+  $("pt-agents").classList.toggle("active", type === "agents");
+  $("pt-blueprints").classList.toggle("active", type === "blueprints");
+  $("panel-agents").style.display = type === "agents" ? "" : "none";
+  $("panel-blueprints").style.display = type === "blueprints" ? "" : "none";
+
+  if (type === "agents") {
+    loadAgentProfiles();
+  } else {
+    loadSoulBlueprints();
+  }
+}
+
+function renderProfileList(containerId, items, onSelect) {
+  const container = $(containerId);
+  container.innerHTML = "";
+
+  if (!items.length) {
+    container.innerHTML = '<div class="empty-state"><span class="empty-icon">🌌</span> None found</div>';
+    return;
+  }
+
+  for (const item of items) {
+    const el = document.createElement("div");
+    el.className = "profile-item";
+    el.dataset.name = item.name;
+
+    const emoji = item.emoji || (profileType === "agents" ? "🤖" : "🌌");
+    el.innerHTML = `
+      <span class="pi-emoji">${emoji}</span>
+      <div class="pi-info">
+        <div class="pi-name">${item.display_name || item.name}</div>
+        <div class="pi-vibe">${item.vibe || ""}</div>
+      </div>
+      ${item.category ? `<span class="pi-category">${item.category.replace(/-/g,' ')}</span>` : ""}
+    `;
+
+    el.addEventListener("click", () => {
+      container.querySelectorAll(".profile-item").forEach(e => e.classList.remove("selected"));
+      el.classList.add("selected");
+      onSelect(item);
+    });
+
+    container.appendChild(el);
+  }
+}
+
+async function loadAgentProfiles() {
+  const container = $("agent-list");
+  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
+
+  const result = await bg("list_profile_agents");
+  if (!result.success) {
+    container.innerHTML = `<div class="empty-state error">SKComm offline — agents require local daemon</div>`;
+    return;
+  }
+
+  renderProfileList("agent-list", result.agents, (item) => {
+    selectedProfile = { type: "agent", name: item.name, display_name: item.display_name };
+    $("profile-selected-label").textContent = `${item.emoji || "🤖"} ${item.display_name || item.name}`;
+    $("profile-actions").style.display = "";
+  });
+}
+
+async function loadSoulBlueprints(category = "") {
+  const container = $("blueprint-list");
+  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
+
+  const result = await bg("list_soul_blueprints", { category });
+  if (!result.success) {
+    container.innerHTML = `<div class="empty-state error">SKComm offline — soul library requires local daemon</div>`;
+    return;
+  }
+
+  if (!result.blueprints.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">🌌</span>
+        No souls installed yet.<br>
+        <small>Click ⬇ Load to fetch from repo.</small>
+      </div>`;
+    return;
+  }
+
+  // Populate category filter
+  const catSelect = $("bp-category-filter");
+  const currentCat = catSelect.value;
+  catSelect.innerHTML = '<option value="">All categories</option>';
+  for (const cat of result.categories) {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat.replace(/-/g, " ");
+    if (cat === currentCat) opt.selected = true;
+    catSelect.appendChild(opt);
+  }
+
+  renderProfileList("blueprint-list", result.blueprints, (item) => {
+    selectedProfile = { type: "blueprint", name: item.name, display_name: item.display_name };
+    $("profile-selected-label").textContent = `${item.emoji || "🌌"} ${item.display_name || item.name}`;
+    $("profile-actions").style.display = "";
+  });
+}
+
+async function profileInject(mode) {
+  if (!selectedProfile) return;
+
+  const unhinged = $("mod-unhinged").checked;
+  const cloud9 = $("mod-cloud9").checked;
+
+  const result = await bg("get_profile_inject", {
+    type: selectedProfile.type,
+    name: selectedProfile.name,
+    unhinged,
+    cloud9,
+  });
+
+  if (!result.success) {
+    showToast(`Profile error: ${result.error}`, "error");
+    return;
+  }
+
+  if (mode === "clipboard") {
+    await navigator.clipboard.writeText(result.prompt);
+    showToast("Profile prompt copied!", "success");
+    return;
+  }
+
+  // inject into active tab
+  const injectResult = await bg("inject_into_tab", { prompt: result.prompt });
+  if (injectResult?.success) {
+    showToast(`${selectedProfile.display_name} injected!`, "success");
+  } else {
+    // Fall back to clipboard
+    await navigator.clipboard.writeText(result.prompt);
+    showToast("Copied (not on AI platform)", "");
+  }
+}
+
+async function installSoulLibrary() {
+  const btn = $("btn-load-library");
+  btn.disabled = true;
+  btn.textContent = "Loading...";
+
+  const result = await bg("install_soul_library", { source_path: "" });
+
+  btn.disabled = false;
+  btn.textContent = "⬇ Load";
+
+  if (result.success) {
+    showToast(`Installed ${result.installed} souls!`, "success", 3000);
+    loadSoulBlueprints();
+  } else {
+    showToast(`Install failed: ${result.error}`, "error", 4000);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
 
@@ -566,7 +733,21 @@ async function init() {
     loadSnapshots(),
   ]);
 
-  // Event listeners
+  // Tab bar
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      $(`tab-${btn.dataset.tab}`).classList.add("active");
+
+      if (btn.dataset.tab === "profiles" && profileType === "agents") {
+        loadAgentProfiles();
+      }
+    });
+  });
+
+  // Main tab event listeners
   $("btn-capture").addEventListener("click", captureConsciousness);
   $("btn-refresh").addEventListener("click", loadSnapshots);
   $("btn-send-msg").addEventListener("click", sendMessage);
@@ -575,6 +756,14 @@ async function init() {
   $("btn-export-anyway").addEventListener("click", exportAnyway);
   $("btn-conflict-cancel").addEventListener("click", closeConflictDialog);
   $("btn-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
+
+  // Profiles tab event listeners
+  $("pt-agents").addEventListener("click", () => switchProfileType("agents"));
+  $("pt-blueprints").addEventListener("click", () => switchProfileType("blueprints"));
+  $("btn-profile-inject").addEventListener("click", () => profileInject("inject"));
+  $("btn-profile-copy").addEventListener("click", () => profileInject("clipboard"));
+  $("btn-load-library").addEventListener("click", installSoulLibrary);
+  $("bp-category-filter").addEventListener("change", e => loadSoulBlueprints(e.target.value));
 }
 
 document.addEventListener("DOMContentLoaded", init);
